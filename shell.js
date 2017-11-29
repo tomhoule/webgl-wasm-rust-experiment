@@ -93,7 +93,19 @@ function main() {
 
     fetch('target/lib.wasm')
         .then(response => response.arrayBuffer())
-        .then(bytes => WebAssembly.instantiate(bytes, {}))
+        .then(bytes => WebAssembly.instantiate(bytes, {
+            env: {
+                'memoryBase': 0,
+                'tableBase': 0,
+                'memory': new WebAssembly.Memory({initial: 256}),
+                'alert': window.alert,
+                'table': new WebAssembly.Table({
+                    initial: 0,
+                    element: "anyfunc",
+                })
+            },
+
+        }))
         .then(results => {
             const memory = results.instance.exports.memory
             const initialPositionsPtr = results.instance.exports.initial_positions()
